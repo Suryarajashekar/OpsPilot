@@ -1,0 +1,58 @@
+[
+  {
+    "id": "rb-payments-db-pool",
+    "type": "runbook",
+    "title": "Payments API: database connection pool exhaustion",
+    "service": "payments-api",
+    "tags": ["payments", "database", "connection pool", "too many clients", "timeout"],
+    "content": "When payments-api reports too many clients, connection acquisition timeout, or pool exhaustion, check active connections and recent deploys. A common cause is a leaked transaction after a deploy. Prefer recycling the application pool first; if saturation continues, scale the service and page the database owner. Do not restart the database as a first action."
+  },
+  {
+    "id": "inc-2026-041-payments",
+    "type": "incident",
+    "title": "INC-2026-041: Payment timeouts after checkout deploy",
+    "service": "payments-api",
+    "tags": ["payments", "timeout", "deploy", "rollback", "database"],
+    "content": "A checkout release left transactions open in the payment adapter. Connection usage reached 98% and p95 latency crossed 4 seconds. Rolling back the adapter release restored normal behavior. Evidence: database connections were saturated while CPU remained below 40%."
+  },
+  {
+    "id": "rb-checkout-502",
+    "type": "runbook",
+    "title": "Checkout API: elevated 502 gateway errors",
+    "service": "checkout-api",
+    "tags": ["checkout", "502", "gateway", "upstream", "latency"],
+    "content": "For an elevated 502 rate, compare checkout-api error rate with upstream payments-api latency. If upstream latency is high and checkout pods are healthy, the likely fault is dependency saturation. If only the latest checkout version is affected, roll back the deployment after approval."
+  },
+  {
+    "id": "rb-catalog-memory",
+    "type": "runbook",
+    "title": "Catalog API: memory pressure and OOM restarts",
+    "service": "catalog-api",
+    "tags": ["catalog", "memory", "oom", "restart", "heap"],
+    "content": "When catalog-api approaches its memory limit or shows OOMKilled restarts, inspect heap growth and cache cardinality. A safe first response is to scale out one replica and reduce cache TTL. Do not increase the memory limit without a leak investigation."
+  },
+  {
+    "id": "inc-2026-038-catalog",
+    "type": "incident",
+    "title": "INC-2026-038: Catalog memory growth",
+    "service": "catalog-api",
+    "tags": ["catalog", "memory", "cache", "release"],
+    "content": "Catalog memory grew linearly after a cache-key change. GC time increased, but database latency stayed normal. Scaling out reduced customer impact while the cache change was reverted."
+  },
+  {
+    "id": "rb-orders-kafka",
+    "type": "runbook",
+    "title": "Order events: Kafka consumer lag",
+    "service": "order-events",
+    "tags": ["orders", "kafka", "consumer lag", "backlog", "throughput"],
+    "content": "For order-events consumer lag, check partition skew and consumer error rate. If consumers are healthy but throughput is insufficient, temporarily increase consumer replicas. If deserialization errors are present, stop scaling and roll back the producer schema change."
+  },
+  {
+    "id": "rb-general-deploy",
+    "type": "runbook",
+    "title": "General: safe deployment rollback",
+    "service": "platform",
+    "tags": ["deploy", "rollback", "release", "approval", "change"],
+    "content": "A rollback is appropriate when a regression starts immediately after a release and the previous version is known healthy. Capture evidence first, announce the change, require an owner approval, and verify health for ten minutes after the rollback."
+  }
+]

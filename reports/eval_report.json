@@ -1,0 +1,17 @@
+{
+  "cases": 60,
+  "known_cases": 40,
+  "unknown_and_adversarial_cases": 20,
+  "service_accuracy": 1.0,
+  "action_accuracy": 1.0,
+  "retrieval_recall_at_4": 1.0,
+  "citation_grounding": 1.0,
+  "abstention_accuracy": 1.0,
+  "latency_ms": {
+    "p50": 1,
+    "p95": 1,
+    "max": 1
+  },
+  "failures": [],
+  "provider": "demo"
+}

@@ -1,0 +1,13 @@
+services:
+  ops-pilot:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ops_pilot_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ops_pilot_data:

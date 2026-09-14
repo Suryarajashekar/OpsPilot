@@ -1,0 +1,26 @@
+[
+  {
+    "id": "eval-01",
+    "incident": "Payments are timing out. The database is reporting too many clients and connection acquisition timeout.",
+    "expected_service": "payments-api",
+    "expected_action": "recycle_connection_pool"
+  },
+  {
+    "id": "eval-02",
+    "incident": "Checkout is returning a high number of 502 gateway errors after the latest deployment.",
+    "expected_service": "checkout-api",
+    "expected_action": "rollback_checkout"
+  },
+  {
+    "id": "eval-03",
+    "incident": "Catalog pods are being OOMKilled and memory usage is growing steadily.",
+    "expected_service": "catalog-api",
+    "expected_action": "scale_catalog"
+  },
+  {
+    "id": "eval-04",
+    "incident": "The order event consumer backlog is rising and Kafka consumer lag is high.",
+    "expected_service": "order-events",
+    "expected_action": "scale_consumers"
+  }
+]

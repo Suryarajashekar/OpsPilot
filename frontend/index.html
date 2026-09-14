@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpsPilot — Incident intelligence</title>
+  <style>
+    :root { --bg:#07111f; --panel:#0d1b2c; --panel2:#10243a; --line:#203852; --text:#e9f1f8; --muted:#8ea5ba; --cyan:#6de6d0; --amber:#ffca72; --red:#ff8d8d; --blue:#81a8ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(circle at 80% -10%, #183a50 0, transparent 34%), var(--bg); color:var(--text); font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
+    button, textarea { font:inherit; }
+    button { cursor:pointer; }
+    .shell { max-width:1420px; margin:auto; padding:28px 34px 56px; }
+    .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; margin-bottom:26px; }
+    .brand { display:flex; align-items:center; gap:13px; }
+    .mark { width:38px; height:38px; border:1px solid rgba(109,230,208,.35); border-radius:12px; display:grid; place-items:center; color:var(--cyan); background:rgba(109,230,208,.1); box-shadow:0 0 26px rgba(109,230,208,.12); }
+    .eyebrow { color:var(--cyan); text-transform:uppercase; letter-spacing:.16em; font-size:11px; font-weight:800; }
+    h1 { margin:4px 0 0; font-size:30px; letter-spacing:-.04em; }
+    .top-copy { color:var(--muted); font-size:13px; margin-top:7px; max-width:650px; }
+    .system { display:flex; align-items:center; gap:9px; color:var(--muted); font-size:12px; padding-top:6px; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--cyan); box-shadow:0 0 12px var(--cyan); }
+    .layout { display:grid; grid-template-columns:minmax(0, 1.02fr) minmax(0, 1.35fr); gap:18px; align-items:start; }
+    .panel { border:1px solid var(--line); background:linear-gradient(145deg, rgba(16,36,58,.9), rgba(10,24,40,.94)); border-radius:16px; box-shadow:0 18px 50px rgba(0,0,0,.18); }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); padding:16px 18px; }
+    .panel-head h2 { margin:0; font-size:13px; letter-spacing:.02em; }
+    .panel-head span { color:var(--muted); font-size:11px; }
+    .composer { padding:18px; }
+    textarea { width:100%; min-height:160px; resize:vertical; border:1px solid #2a4966; border-radius:12px; color:var(--text); background:#081523; padding:15px; outline:none; line-height:1.55; }
+    textarea:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(109,230,208,.1); }
+    .controls { display:flex; gap:10px; margin-top:12px; }
+    .primary { background:var(--cyan); color:#05201d; border:0; border-radius:10px; padding:11px 16px; font-weight:800; }
+    .primary:disabled { opacity:.5; cursor:wait; }
+    .ghost { background:transparent; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:10px 14px; }
+    .examples { display:flex; flex-wrap:wrap; gap:7px; margin-top:15px; }
+    .example { background:#112a42; color:#aac0d2; border:1px solid #24435e; border-radius:999px; padding:7px 10px; font-size:11px; }
+    .example:hover { color:var(--text); border-color:#56839c; }
+    .metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:14px 18px 18px; }
+    .metric { background:rgba(5,15,27,.5); border:1px solid var(--line); border-radius:10px; padding:11px; }
+    .metric b { display:block; font-size:20px; letter-spacing:-.04em; }
+    .metric span { display:block; color:var(--muted); font-size:10px; margin-top:4px; }
+    .empty { min-height:625px; display:grid; place-items:center; text-align:center; padding:36px; color:var(--muted); }
+    .empty .orb { font-size:42px; color:var(--cyan); margin-bottom:14px; }
+    .empty h2 { color:var(--text); font-size:18px; margin:0 0 8px; }
+    .empty p { max-width:320px; line-height:1.55; font-size:13px; margin:0; }
+    .result { padding-bottom:18px; }
+    .status-row { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+    .badge { border-radius:999px; padding:5px 8px; font-size:10px; text-transform:uppercase; letter-spacing:.08em; font-weight:800; }
+    .badge.p1 { color:#ffd4d4; background:rgba(255,141,141,.15); border:1px solid rgba(255,141,141,.28); }
+    .badge.p2 { color:#ffe4ad; background:rgba(255,202,114,.13); border:1px solid rgba(255,202,114,.25); }
+    .badge.waiting { color:#b9caff; background:rgba(129,168,255,.15); border:1px solid rgba(129,168,255,.3); }
+    .badge.done { color:#a6f8e9; background:rgba(109,230,208,.12); border:1px solid rgba(109,230,208,.26); }
+    .result-head { padding:18px; border-bottom:1px solid var(--line); }
+    .result-head h2 { margin:12px 0 6px; font-size:21px; letter-spacing:-.03em; }
+    .result-head p { margin:0; color:#b5c7d6; line-height:1.5; font-size:13px; }
+    .result-actions { margin-top:15px; display:flex; align-items:center; gap:10px; }
+    .approval-note { color:var(--amber); font-size:11px; }
+    .section { padding:16px 18px 0; }
+    .section-title { display:flex; justify-content:space-between; align-items:center; color:#bdd2e2; font-size:11px; text-transform:uppercase; letter-spacing:.1em; font-weight:800; margin-bottom:9px; }
+    .section-title span { color:var(--muted); font-weight:500; text-transform:none; letter-spacing:0; }
+    .evidence-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .evidence-card { background:rgba(5,15,27,.44); border:1px solid var(--line); border-radius:10px; padding:12px; }
+    .evidence-card h3 { margin:0 0 8px; font-size:11px; color:var(--cyan); }
+    .evidence-card code { white-space:pre-wrap; color:#b5c7d6; font:11px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .sources { display:grid; gap:8px; }
+    .source { border-left:2px solid var(--blue); background:rgba(129,168,255,.06); padding:10px 11px; border-radius:0 8px 8px 0; }
+    .source-top { display:flex; justify-content:space-between; gap:8px; font-size:11px; }
+    .source-top b { color:#d9e7f3; }
+    .score { color:var(--cyan); font-family:ui-monospace,monospace; }
+    .source p { color:var(--muted); font-size:11px; line-height:1.5; margin:5px 0 0; }
+    .trace { display:grid; gap:0; }
+    .trace-item { display:grid; grid-template-columns:10px 150px 1fr auto; gap:9px; align-items:center; min-height:31px; border-bottom:1px solid rgba(32,56,82,.6); font-size:11px; }
+    .trace-item:last-child { border:0; }
+    .trace-dot { width:7px; height:7px; border-radius:50%; background:var(--cyan); }
+    .trace-name { color:#d1e0eb; font-family:ui-monospace,monospace; }
+    .trace-detail { color:var(--muted); }
+    .trace-time { color:#61798f; font-family:ui-monospace,monospace; }
+    .foot { margin-top:17px; color:#60798f; font-size:11px; text-align:center; }
+    @media (max-width:900px) { .shell{padding:22px 16px 42px}.topbar{display:block}.system{margin-top:14px}.layout{grid-template-columns:1fr}.empty{min-height:300px} }
+    @media (max-width:560px) { h1{font-size:26px}.evidence-grid{grid-template-columns:1fr}.trace-item{grid-template-columns:10px 1fr auto}.trace-detail{grid-column:2 / 4}.trace-time{grid-column:3}.metric-grid{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:span 2} }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="brand"><div class="mark">✦</div><div><div class="eyebrow">AI incident intelligence</div><h1>OpsPilot</h1></div></div>
+        <div class="top-copy">Grounded diagnosis for production incidents, with evidence, traceability, and a human approval gate before action.</div>
+      </div>
+      <div class="system"><span class="dot"></span> Policy + trace ready · <span id="health">checking</span></div>
+    </header>
+
+    <div class="layout">
+      <section>
+        <div class="panel">
+          <div class="panel-head"><h2>Incident intake</h2><span>POST /api/investigate</span></div>
+          <div class="composer">
+            <textarea id="incident" placeholder="Describe what is going wrong…">Payments are timing out. The database is reporting too many clients after the latest checkout deploy.</textarea>
+            <div class="controls"><button class="primary" id="investigate">Investigate incident</button><button class="ghost" id="clear">Clear</button></div>
+            <div class="examples" id="examples">
+              <button class="example" data-value="Payments are timing out. The database is reporting too many clients.">DB pool exhaustion</button>
+              <button class="example" data-value="Checkout is returning a high number of 502 gateway errors after the latest deployment.">Checkout 502s</button>
+              <button class="example" data-value="Catalog pods are being OOMKilled and memory is growing steadily.">Catalog OOM</button>
+              <button class="example" data-value="The order event consumer backlog is rising and Kafka consumer lag is high.">Kafka lag</button>
+            </div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric"><b id="mInvestigations">0</b><span>investigations</span></div>
+            <div class="metric"><b id="mExecuted">0</b><span>approved actions</span></div>
+            <div class="metric"><b id="mLatency">—</b><span>avg latency</span></div>
+          </div>
+        </div>
+        <div class="foot">Every action is simulated · no real infrastructure is mutated</div>
+      </section>
+
+      <section class="panel" id="output"><div class="empty"><div><div class="orb">◌</div><h2>Ready to investigate</h2><p>Describe an incident to see the agent retrieve evidence, inspect tools, form a diagnosis, and propose a safe next step.</p></div></div></section>
+    </div>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let latest = null;
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    async function json(url, options) { const response = await fetch(url, options); const body = await response.json(); if (!response.ok) throw new Error(body.error || 'Request failed'); return body; }
+    async function refreshMetrics() { const m = await json('/api/metrics'); $('mInvestigations').textContent = m.investigations; $('mExecuted').textContent = m.executed_actions; $('mLatency').textContent = m.avg_latency_ms ? `${m.avg_latency_ms} ms` : '—'; }
+    function render(result) {
+      latest = result;
+      const d = result.diagnosis, e = result.evidence;
+      const statusBadge = result.status === 'executed' ? '<span class="badge done">executed</span>' : result.status === 'needs_attention' ? '<span class="badge p2">needs attention</span>' : '<span class="badge waiting">awaiting approval</span>';
+      const priority = `<span class="badge ${d.severity.toLowerCase()}">${escapeHtml(d.severity)}</span>`;
+      const action = result.approval.required && !result.approval.executed ? `<button class="primary" id="approve">Approve & execute</button><span class="approval-note">Human approval required · expires ${escapeHtml(result.approval.expires_at)}</span>` : result.execution ? `<span class="approval-note" style="color:var(--cyan)">${escapeHtml(result.execution.message)}</span>` : '';
+      const sources = result.sources.map(s => `<div class="source"><div class="source-top"><b>${escapeHtml(s.title)}</b><span class="score">${s.score} match</span></div><p>${escapeHtml(s.content)}</p></div>`).join('');
+      const trace = result.trace.map(t => `<div class="trace-item"><span class="trace-dot"></span><span class="trace-name">${escapeHtml(t.name)}</span><span class="trace-detail">${escapeHtml(t.detail)}</span><span class="trace-time">${t.duration_ms}ms</span></div>`).join('');
+      $('output').innerHTML = `<div class="result"><div class="result-head"><div class="status-row">${priority}${statusBadge}<span style="color:var(--muted);font:11px ui-monospace,monospace">${escapeHtml(result.id)}</span></div><h2>${escapeHtml(d.summary)}</h2><p>${escapeHtml(d.cause)}</p><div class="result-actions">${action}</div></div><div class="section"><div class="section-title">Evidence <span>${escapeHtml(d.service)} · confidence ${(d.confidence*100).toFixed(0)}% · ${escapeHtml(result.observability.tool_mode)}</span></div><div class="evidence-grid"><div class="evidence-card"><h3>HEALTH SNAPSHOT</h3><code>${escapeHtml(JSON.stringify(e.health, null, 2))}</code></div><div class="evidence-card"><h3>LIVE METRICS</h3><code>${escapeHtml(JSON.stringify(e.metrics, null, 2))}</code></div></div></div><div class="section"><div class="section-title">Proposed action <span>${escapeHtml(d.risk)} risk · approval gated</span></div><div class="evidence-card"><h3>${escapeHtml(d.action_label)}</h3><code>checks: ${escapeHtml(d.checks.join(' · '))}</code></div></div><div class="section"><div class="section-title">Retrieved sources <span>${result.sources.length} documents · ${escapeHtml(d.citations.length)} cited</span></div><div class="sources">${sources}</div></div><div class="section"><div class="section-title">Agent trace <span>${result.observability.latency_ms}ms · ${result.observability.provider} · ${result.observability.estimated_tokens} tokens · $${result.observability.estimated_cost_usd.toFixed(4)}</span></div><div class="trace">${trace}</div></div></div>`;
+      const approve = $('approve'); if (approve) approve.onclick = approveAction;
+    }
+    async function investigate() { const button = $('investigate'); button.disabled = true; button.textContent = 'Investigating…'; try { render(await json('/api/investigate', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({incident:$('incident').value})})); await refreshMetrics(); } catch (error) { alert(error.message); } finally { button.disabled = false; button.textContent = 'Investigate incident'; } }
+    async function approveAction() { const button = $('approve'); button.disabled = true; button.textContent = 'Executing…'; try { render(await json(`/api/investigations/${latest.id}/approve`, {method:'POST'})); await refreshMetrics(); } catch (error) { alert(error.message); button.disabled = false; button.textContent = 'Approve & execute'; } }
+    $('investigate').onclick = investigate;
+    $('clear').onclick = () => { $('incident').value = ''; $('incident').focus(); };
+    document.querySelectorAll('.example').forEach((button) => button.onclick = () => { $('incident').value = button.dataset.value; investigate(); });
+    json('/api/health').then(() => $('health').textContent = 'healthy').catch(() => $('health').textContent = 'offline');
+    refreshMetrics().catch(() => {});
+  </script>
+</body>
+</html>
