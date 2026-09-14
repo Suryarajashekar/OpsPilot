@@ -68,7 +68,3 @@ Set `PROMETHEUS_URL` to connect the read-only Prometheus adapter. Mutations rema
 - Which actions are reversible, and how is the audit trail used?
 - How does the system behave if the model provider is unavailable?
 - What is the difference between demo telemetry and a real Prometheus signal?
-
-## Resume-ready proof points
-
-After running the suite, use the measured values from `reports/eval_report.json` rather than invented metrics. The current offline suite is designed to report service accuracy, action accuracy, retrieval recall@4, citation grounding, abstention accuracy, and p95 latency.
